@@ -353,7 +353,8 @@ begin
     jc.d.scale_denom := 1 shl Byte(FScale);
     jc.d.do_block_smoothing := FSmoothing;
 
-    if FGrayscale then jc.d.out_color_space := JCS_GRAYSCALE;
+    if FGrayscale then jc.d.out_color_space := JCS_GRAYSCALE
+    else jc.d.out_color_space := JCS_RGB;
     if (PixelFormat = jf8Bit) or (jc.d.out_color_space = JCS_GRAYSCALE) then
     begin
       jc.d.quantize_colors := True;

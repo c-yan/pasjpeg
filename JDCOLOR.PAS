@@ -210,6 +210,62 @@ begin
   end;
 end;
 
+{METHODDEF}
+procedure ycck_rgb_convert (cinfo : j_decompress_ptr;
+		           input_buf : JSAMPIMAGE;
+                           input_row : JDIMENSION;
+                           output_buf : JSAMPARRAY;
+                           num_rows : int); far;
+var
+  {register} y, cb, cr, k : int;
+  {register} outptr : JSAMPROW;
+  {register} inptr0, inptr1, inptr2, inptr3 : JSAMPROW;
+  {register} col : JDIMENSION;
+  num_cols : JDIMENSION;
+  { copy these pointers into registers if possible }
+  val: double;
+begin
+  num_cols := cinfo^.output_width;
+
+  while (num_rows > 0) do
+  begin
+    Dec(num_rows);
+    inptr0 := input_buf^[0]^[input_row];
+    inptr1 := input_buf^[1]^[input_row];
+    inptr2 := input_buf^[2]^[input_row];
+    inptr3 := input_buf^[3]^[input_row];
+    Inc(input_row);
+    outptr := output_buf^[0];
+    Inc(JSAMPROW_PTR(output_buf));
+    for col := 0 to pred(num_cols) do
+    begin
+      y  := 255 - GETJSAMPLE(inptr0^[col]);
+      cb := 255 - GETJSAMPLE(inptr1^[col]);
+      cr := 255 - GETJSAMPLE(inptr2^[col]);
+      k  := 220 - GETJSAMPLE(inptr3^[col]);
+
+      val := y + 1.402 * (cr - 128) - k;
+      val := (val - 128) * 0.65 + 128;
+      if val < 0.0 then outptr^[RGB_RED] := 0
+      else if val > 255.0 then outptr^[RGB_RED] := 255
+      else outptr^[RGB_RED] := Trunc(val + 0.5);
+
+      val := y - 0.34414 * (cb - 128) - 0.71414 * (cr - 128) - k;
+      val := (val - 128) * 0.65 + 128;
+      if val < 0.0 then outptr^[RGB_GREEN] := 0
+      else if val > 255.0 then outptr^[RGB_GREEN] := 255
+      else outptr^[RGB_GREEN] := Trunc(val + 0.5);
+
+      val := y + 1.772 * (cb - 128) - k;
+      val := (val - 128) * 0.65 + 128;
+      if val < 0.0 then outptr^[RGB_BLUE] := 0
+      else if val > 255.0 then outptr^[RGB_BLUE] := 255
+      else outptr^[RGB_BLUE] := Trunc(val + 0.5);
+
+      Inc(JSAMPLE_PTR(outptr), RGB_PIXELSIZE);
+    end;
+  end;
+end;
 
 {*************** Cases other than YCbCr -> RGB *************}
 
@@ -455,12 +511,18 @@ begin
           cconvert^.pub.color_convert := gray_rgb_convert;
         end
         else
-          if (cinfo^.jpeg_color_space = JCS_RGB) and (RGB_PIXELSIZE = 3) then
+          if (cinfo^.jpeg_color_space = JCS_YCCK) then
           begin
-            cconvert^.pub.color_convert := null_convert;
+            cconvert^.pub.color_convert := ycck_rgb_convert;
+            build_ycc_rgb_table(cinfo);
           end
           else
-            ERREXIT(j_common_ptr(cinfo), JERR_CONVERSION_NOTIMPL);
+            if (cinfo^.jpeg_color_space = JCS_RGB) and (RGB_PIXELSIZE = 3) then
+            begin
+              cconvert^.pub.color_convert := null_convert;
+            end
+            else
+              ERREXIT(j_common_ptr(cinfo), JERR_CONVERSION_NOTIMPL);
     end;
 
   JCS_CMYK:
