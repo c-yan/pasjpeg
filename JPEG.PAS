@@ -455,7 +455,9 @@ begin
         end;
 
         if ProgressiveEncoding then
-          jpeg_simple_progression(@jc.c);
+          jpeg_simple_progression(@jc.c)
+        else
+          jc.c.optimize_coding := True;
 
         SrcScanline := Src.ScanLine[0];
         PtrInc := Integer(Src.ScanLine[1]) - Integer(SrcScanline);
