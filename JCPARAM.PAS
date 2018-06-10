@@ -212,8 +212,8 @@ end;
 {LOCAL}
 procedure add_huff_table (cinfo : j_compress_ptr;
                           var htblptr : JHUFF_TBL_PTR;
-                          var bits : array of UINT8;
-                          var val : array of UINT8);
+                          const bits : array of UINT8;
+                          const val : array of UINT8);
 { Define a Huffman table }
 var
   nsymbols, len : int;
