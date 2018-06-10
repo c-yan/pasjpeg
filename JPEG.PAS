@@ -162,8 +162,8 @@ type
     { extra Delphi info }
     instance: TJPEGImage;       { ptr to current TJPEGImage object }
     last_pass: Integer;
-    last_pct: Integer;
-    last_time: Integer;
+    last_pct: DWORD;
+    last_time: DWORD;
     last_scanline: Integer;
   end;
 
@@ -293,9 +293,9 @@ end;
 
 procedure ProgressCallback(const cinfo: jpeg_common_struct);
 var
-  Ticks: Integer;
+  Ticks: DWORD;
   R: TRect;
-  temp: Integer;
+  temp: DWORD;
   progress : new_progress_mgr_ptr;
 begin
   progress := new_progress_mgr_ptr(cinfo.progress);
