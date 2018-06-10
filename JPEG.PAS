@@ -411,7 +411,7 @@ end;
 procedure TJPEGImage.Compress;
 var
   LinesWritten, LinesPerCall: Integer;
-  SrcScanLine: Pointer;
+  SrcScanLine: ^Byte;
   PtrInc: Integer;
   jc: TJPEGContext;
   Src: TBitmap;
@@ -475,7 +475,7 @@ begin
           while (jc.c.next_scanline < jc.c.image_height) do
           begin
             LinesWritten := jpeg_write_scanlines(@jc.c, @SrcScanline, LinesPerCall);
-            Inc(Integer(SrcScanline), PtrInc * LinesWritten);
+            Inc(SrcScanline, PtrInc * LinesWritten);
           end;
 
           jpeg_finish_compress(@jc.c);
@@ -568,7 +568,7 @@ end;
 function TJPEGImage.GetBitmap: TBitmap;
 var
   LinesPerCall, LinesRead: Integer;
-  DestScanLine: Pointer;
+  DestScanLine: ^Byte;
   PtrInc: Integer;
   jc: TJPEGContext;
   GeneratePalette: Boolean;
@@ -639,7 +639,7 @@ begin
             while (jc.d.output_scanline < jc.d.output_height) do
             begin
               LinesRead := jpeg_read_scanlines(@jc.d, @DestScanline, LinesPerCall);
-              Inc(Integer(DestScanline), PtrInc * LinesRead);
+              Inc(DestScanline, PtrInc * LinesRead);
             end;
             jpeg_finish_output(@jc.d);
           end;
@@ -667,7 +667,7 @@ begin
         while (jc.d.output_scanline < jc.d.output_height) do
         begin
           LinesRead := jpeg_read_scanlines(@jc.d, @DestScanline, LinesPerCall);
-          Inc(Integer(DestScanline), PtrInc * LinesRead);
+          Inc(DestScanline, PtrInc * LinesRead);
         end;
 
         if jc.d.buffered_image then jpeg_finish_output(@jc.d);

@@ -18,7 +18,7 @@ interface
       ushort = Word;
       long = longint;
 {$ELSE}
-{$IFDEF WIN32}
+{$IF DEFINED(WIN32) OR DEFINED(WIN64)}
   { Delphi 2.0 }
   type
     int = Integer;
@@ -42,7 +42,7 @@ interface
       ushort = Word;
       long = longint;
     {$ENDIF}
-{$ENDIF}
+{$IFEND}
 {$ENDIF}
 type
   voidp = pointer;

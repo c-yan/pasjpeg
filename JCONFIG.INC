@@ -102,9 +102,11 @@
 {$endif}
 
 {$undef BASM16}                  { for TP7 - use BASM for fast multiply }
-{$ifdef Win32}
+{$if defined(Win32) or defined(Win64)}
   {$ifndef FPC}
-    {$define BASM}                 { jidctint with BASM for Delphi 2/3 }
+    {$ifdef Win32}
+      {$define BASM}                 { jidctint with BASM for Delphi 2/3 }
+    {$endif}
     {$undef RGB_RED_IS_0}          { BGR byte order in JQUANT2 }
   {$endif}
-{$endif}
+{$ifend}
