@@ -49,6 +49,7 @@ type
     FGrayScale: Boolean;
     FPixelFormat: TJPEGPixelFormat;
     FQuality: TJPEGQualityRange;
+    FChromaSubsampling: Boolean;
     FProgressiveDisplay: Boolean;
     FProgressiveEncoding: Boolean;
     FPerformance: TJPEGPerformance;
@@ -101,6 +102,7 @@ type
 
     { Compression options }
     property CompressionQuality: TJPEGQualityRange read FQuality write FQuality;
+    property ChromaSubsampling: Boolean read FChromaSubsampling write FChromaSubsampling;
 
     { Decompression options }
     property PixelFormat: TJPEGPixelFormat read FPixelFormat write SetPixelFormat;
@@ -119,6 +121,7 @@ type
     ProgressiveEncoding: Boolean;
     Scale: TJPEGScale;
     Smoothing: Boolean;
+    ChromaSubsampling: Boolean;
   end;
 
 var   { Default settings for all new TJPEGImage instances }
@@ -131,6 +134,7 @@ var   { Default settings for all new TJPEGImage instances }
     ProgressiveEncoding: False;
     Scale: jsFullSize;
     Smoothing: True;
+    ChromaSubsampling: True;
   );
 
 implementation
@@ -250,6 +254,7 @@ begin
   FProgressiveEncoding := JPEGDefaults.ProgressiveEncoding;
   FScale := JPEGDefaults.Scale;
   FSmoothing := JPEGDefaults.Smoothing;
+  FChromaSubsampling := JPEGDefaults.ChromaSubsampling;
 end;
 
 destructor TJPEGImage.Destroy;
@@ -448,6 +453,12 @@ begin
 
         jpeg_set_defaults(@jc.c);
         jpeg_set_quality(@jc.c, FQuality, True);
+
+        if not FChromaSubsampling then
+        begin
+          jc.c.comp_info^[0].h_samp_factor := 1;
+          jc.c.comp_info^[0].v_samp_factor := 1;
+        end;
 
         if FGrayscale then
         begin
